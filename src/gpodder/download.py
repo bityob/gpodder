@@ -273,7 +273,8 @@ class DownloadURLOpener:
                          headers=headers,
                          stream=True,
                          auth=auth,
-                         timeout=gpodder.SOCKET_TIMEOUT) as resp:
+                         timeout=gpodder.SOCKET_TIMEOUT,
+                         verify=False) as resp:
             try:
                 resp.raise_for_status()
             except HTTPError as e:
