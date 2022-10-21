@@ -2030,7 +2030,7 @@ def website_reachable(url):
         return (False, None)
 
     try:
-        response = requests.get(url, timeout=1)
+        response = requests.get(url, timeout=1, verify=False)
         return (True, response)
     except requests.exceptions.RequestException:
         pass

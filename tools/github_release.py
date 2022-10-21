@@ -43,7 +43,7 @@ def download_items(urls, prefix):
         print("I: downloading %s" % url)
         filename = url.split('/')[-1]
         output = os.path.join("_build", "{}-{}".format(prefix, filename))
-        with requests.get(url, stream=True) as r:
+        with requests.get(url, stream=True, verify=False) as r:
             with open(output, "wb") as f:
                 for chunk in r.iter_content(chunk_size=1000000):
                     f.write(chunk)
@@ -52,7 +52,7 @@ def download_items(urls, prefix):
 def download_circleci(circleci, prefix):
     """ download build artifacts from circleCI and exit """
     print("I: downloading release artifacts from Circle.ci")
-    artifacts = requests.get("https://circleci.com/api/v1.1/project/github/gpodder/gpodder/%s/artifacts" % circleci).json()
+    artifacts = requests.get("https://circleci.com/api/v1.1/project/github/gpodder/gpodder/%s/artifacts" % circleci, verify=False).json()
     items = set([u["url"] for u in artifacts if re.match(".+/gPodder-.+\.zip$", u["path"])])
     if len(items) == 0:
         error_exit("Nothing found to download")
@@ -62,11 +62,11 @@ def download_circleci(circleci, prefix):
 def download_appveyor(appveyor_build, prefix):
     """ download build artifacts from appveyor and exit """
     print("I: downloading release artifacts from appveyor")
-    build = requests.get("https://ci.appveyor.com/api/projects/elelay/gpodder/build/%s" % appveyor_build).json()
+    build = requests.get("https://ci.appveyor.com/api/projects/elelay/gpodder/build/%s" % appveyor_build, verify=False).json()
     job_id = build.get("build", {}).get("jobs", [{}])[0].get("jobId")
     if job_id:
         job_url = "https://ci.appveyor.com/api/buildjobs/{}/artifacts".format(job_id)
-        artifacts = requests.get(job_url).json()
+        artifacts = requests.get(job_url, verify=False).json()
         items = ["{}/{}".format(job_url, f["fileName"]) for f in artifacts if f["type"] == "File"]
         if len(items) == 0:
             error_exit("Nothing found to download")
