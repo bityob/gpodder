@@ -30,10 +30,15 @@ MODULES = [
     ('mygpoclient', r'mygpoclient-[0-9.]+/(mygpoclient/[^/]*\.py)')
 ]
 
+import ssl
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 
 def get_tarball_url(modulename):
     url = 'http://pypi.python.org/pypi/' + modulename
-    html = urllib.request.urlopen(url).read().decode('utf-8')
+    html = urllib.request.urlopen(url, context=ctx).read().decode('utf-8')
     match = re.search(r'(http[s]?://[^>]*%s-([0-9.]*)(?:\.post\d+)?\.tar\.gz)' % modulename, html)
     return match.group(0) if match is not None else None
 
@@ -44,7 +49,7 @@ for module, required_files in MODULES:
     if tarball_url is None:
         print('Cannot determine download URL for', module, '- aborting!')
         break
-    data = urllib.request.urlopen(tarball_url).read()
+    data = urllib.request.urlopen(tarball_url, context=ctx).read()
     print('%d KiB' % (len(data) // 1024))
     print('  downloaded from %s' % tarball_url)
     tar = tarfile.open(fileobj=io.BytesIO(data))
